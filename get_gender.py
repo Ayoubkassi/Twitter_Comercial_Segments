@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 
 
 def getNames():
-    genders = {"female": ["feminine", 2], "male": ["masculine", 2]}
+    # different genders and their corresponding number of pages
+    genders = {"female": ["feminine", 41], "male": ["masculine", 50]}
     data = {}
     for key, val in genders.items():
         my_names = []
