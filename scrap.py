@@ -43,7 +43,7 @@ class TwitterAdvancedSearch:
         self.from_date = from_date
         self.to_date = to_date
 
-    def getTweets(self, username, password):
+    def getTweets(self, username, password, nbPage):
         try:
             twitter_login = "https://twitter.com/i/flow/login"
             driver = webdriver.Chrome()
@@ -83,8 +83,9 @@ class TwitterAdvancedSearch:
             sleep(3)
             driver.get(url)
             sleep(5)
-            driver.execute_script("window.scrollBy(0, 500000);")
-            sleep(3)
+            for i in range(nbPage):
+                driver.execute_script("window.scrollBy(0, 5000);")
+                sleep(1)
             html = driver.page_source
             file = open("scrap.html", "w")
             # Write the data to the file
@@ -131,32 +132,36 @@ class TwitterAdvancedSearch:
             tweet_text = ""
             tweet_div = articles.find("div", {"data-testid": "tweetText"})
             tweets = tweet_div.find_all("span")
-            for tweet in tweets:
-                if tweet.string.strip() != "\n" and tweet.string.strip() != "":
-                    tweet_text += tweet.string.strip() + " "
+            try:
+                for tweet in tweets:
+                    if tweet.string.strip() != "\n" and tweet.string.strip() != "":
+                        tweet_text += tweet.string.strip() + " "
 
-            twitter_tweets.append(tweet_text)
+                twitter_tweets.append(tweet_text)
 
-            # replys
-            reply_div = articles.find("div", {"data-testid": "reply"})
-            reply = reply_div.find_all("span")[-1].string
-            if reply == None:
-                reply = "0"
-            twitter_replies.append(reply)
+                # replys
+                reply_div = articles.find("div", {"data-testid": "reply"})
+                reply = reply_div.find_all("span")[-1].string
+                if reply == None:
+                    reply = "0"
+                twitter_replies.append(reply)
 
-            # retweet
-            retweet_div = articles.find("div", {"data-testid": "retweet"})
-            retweet = reply_div.find_all("span")[-1].string
-            if retweet == None:
-                retweet = "0"
-            twitter_retweets.append(retweet)
+                # retweet
+                retweet_div = articles.find("div", {"data-testid": "retweet"})
+                retweet = reply_div.find_all("span")[-1].string
+                if retweet == None:
+                    retweet = "0"
+                twitter_retweets.append(retweet)
 
-            # retweet
-            like_div = articles.find("div", {"data-testid": "like"})
-            like = reply_div.find_all("span")[-1].string
-            if like == None:
-                like = "0"
-            twitter_likes.append(like)
+                # retweet
+                like_div = articles.find("div", {"data-testid": "like"})
+                like = reply_div.find_all("span")[-1].string
+                if like == None:
+                    like = "0"
+                twitter_likes.append(like)
+
+            except:
+                pass
 
         data["names"] = twitter_names
         data["usernames"] = twitter_usernames
@@ -203,10 +208,13 @@ class TwitterAdvancedSearch:
             with open("profiles/" + user + ".html") as file:
                 html = file.read()
             soup = BeautifulSoup(html, "html.parser")
-            script = soup.find(
-                "script", {"data-testid": "UserProfileSchema-test"}
-            ).string
-            data = json.loads(str(script))
+            try:
+                script = soup.find(
+                    "script", {"data-testid": "UserProfileSchema-test"}
+                ).string
+                data = json.loads(str(script))
+            except:
+                pass
             try:
                 twitter_user["type"] = data["@type"]
             except:
@@ -262,6 +270,6 @@ class TwitterAdvancedSearch:
 # get html file
 twitter_bot = TwitterAdvancedSearch(words=["iphone", "new"])
 password = os.getenv("PASSWORD")
-twitter_bot.getTweets("KraceAyoub", password)
+twitter_bot.getTweets("KraceAyoub", password, 10)
 twitter_bot.scrapTweets()
 twitter_bot.scrapUsers()
