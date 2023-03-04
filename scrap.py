@@ -3,6 +3,7 @@ from selenium import webdriver
 from time import sleep
 import os
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -93,7 +94,39 @@ class TwitterAdvancedSearch:
         except:
             print("error occured!!")
 
+    def scrapTweets(self):
+        data = {}
+        with open("scrap.html") as file:
+            html = file.read()
 
+        twitter_names = []
+        twitter_usernames = []
+        soup = BeautifulSoup(html, "html.parser")
+        articles = soup.find_all("article")
+        for articles in articles:
+            # names
+            username = articles.find("div", {"data-testid": "User-Names"})
+            subnames = username.contents[0]
+            names = subnames.find_all("span")[1]
+            name = names.string
+            twitter_names.append(name)
+
+            # usernames
+            identifier = username.contents[1]
+            id = identifier.find("a")
+            Id = id.find("span")
+            twitter_usernames.append(Id.string)
+        data["names"] = twitter_names
+        data["usernames"] = twitter_usernames
+        print(data)
+        # usernames
+
+        with open("data.json", "w") as f:
+            json.dump(data, f)
+
+
+# get html file
 twitter_bot = TwitterAdvancedSearch(words=["iphone", "new"])
-password = os.getenv("PASSWORD")
-twitter_bot.getTweets("KraceAyoub", password)
+# password = os.getenv("PASSWORD")
+# twitter_bot.getTweets("KraceAyoub", password)
+twitter_bot.scrapTweets()
