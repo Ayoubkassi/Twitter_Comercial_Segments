@@ -83,7 +83,7 @@ class TwitterAdvancedSearch:
             sleep(3)
             driver.get(url)
             sleep(5)
-            driver.execute_script("window.scrollBy(0, 50000);")
+            driver.execute_script("window.scrollBy(0, 500000);")
             sleep(3)
             html = driver.page_source
             file = open("scrap.html", "w")
@@ -261,7 +261,7 @@ class TwitterAdvancedSearch:
 
 # get html file
 twitter_bot = TwitterAdvancedSearch(words=["iphone", "new"])
-# password = os.getenv("PASSWORD")
-# twitter_bot.getTweets("KraceAyoub", password)
+password = os.getenv("PASSWORD")
+twitter_bot.getTweets("KraceAyoub", password)
 twitter_bot.scrapTweets()
 twitter_bot.scrapUsers()
