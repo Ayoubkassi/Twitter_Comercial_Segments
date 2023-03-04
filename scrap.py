@@ -175,23 +175,23 @@ class TwitterAdvancedSearch:
         data = json.load(f)
         users = data["usernames"]
         # download html files
-        # for user in users:
-        #     # start scraping
-        #     url = "https://twitter.com/" + user
-        #     # we must use selenium bcs twitter first page is lazy loading that use javascript code to render content
-        #     driver = webdriver.Chrome()
-        #     driver.get(url)
-        #     sleep(1)
-        #     html = driver.page_source
-        #     file = open("profiles/" + user + ".html", "w")
-        #     # Write the data to the file
-        #     file.write(html)
-        #     # Close the file
-        #     file.close()
+        for user in users:
+            # start scraping
+            url = "https://twitter.com/" + user
+            # we must use selenium bcs twitter first page is lazy loading that use javascript code to render content
+            driver = webdriver.Chrome()
+            driver.get(url)
+            sleep(1)
+            html = driver.page_source
+            file = open("profiles/" + user + ".html", "w")
+            # Write the data to the file
+            file.write(html)
+            # Close the file
+            file.close()
         # soup = BeautifulSoup(response.content, "html.parser")
         # print(soup.prettify())
 
-        # # localisation
+        # localisation
         # localisation_container = soup.find_all("span")
         # print(localisation_container)
 
@@ -207,22 +207,52 @@ class TwitterAdvancedSearch:
                 "script", {"data-testid": "UserProfileSchema-test"}
             ).string
             data = json.loads(str(script))
-            twitter_user["type"] = data["@type"]
-            twitter_user["dateCreated"] = data["dateCreated"]
-            twitter_user["username"] = data["author"]["additionalName"]
-            twitter_user["givenName"] = data["author"]["givenName"]
-            twitter_user["description"] = data["author"]["description"]
-            twitter_user["location"] = data["author"]["homeLocation"]["name"]
-            twitter_user["id"] = data["author"]["identifier"]
-            twitter_user["follows"] = data["author"]["interactionStatistic"][0][
-                "userInteractionCount"
-            ]
-            twitter_user["friends"] = data["author"]["interactionStatistic"][1][
-                "userInteractionCount"
-            ]
-            twitter_user["tweets"] = data["author"]["interactionStatistic"][2][
-                "userInteractionCount"
-            ]
+            try:
+                twitter_user["type"] = data["@type"]
+            except:
+                pass
+            try:
+                twitter_user["dateCreated"] = data["dateCreated"]
+            except:
+                pass
+            try:
+                twitter_user["username"] = data["author"]["additionalName"]
+            except:
+                pass
+            try:
+                twitter_user["givenName"] = data["author"]["givenName"]
+            except:
+                pass
+            try:
+                twitter_user["description"] = data["author"]["description"]
+            except:
+                pass
+            try:
+                twitter_user["location"] = data["author"]["homeLocation"]["name"]
+            except:
+                pass
+            try:
+                twitter_user["id"] = data["author"]["identifier"]
+            except:
+                pass
+            try:
+                twitter_user["follows"] = data["author"]["interactionStatistic"][0][
+                    "userInteractionCount"
+                ]
+            except:
+                pass
+            try:
+                twitter_user["friends"] = data["author"]["interactionStatistic"][1][
+                    "userInteractionCount"
+                ]
+            except:
+                pass
+            try:
+                twitter_user["tweets"] = data["author"]["interactionStatistic"][2][
+                    "userInteractionCount"
+                ]
+            except:
+                pass
 
             twitter_users.append(twitter_user)
         with open("users.json", "w") as f:
@@ -233,5 +263,5 @@ class TwitterAdvancedSearch:
 twitter_bot = TwitterAdvancedSearch(words=["iphone", "new"])
 # password = os.getenv("PASSWORD")
 # twitter_bot.getTweets("KraceAyoub", password)
-# twitter_bot.scrapTweets()
+twitter_bot.scrapTweets()
 twitter_bot.scrapUsers()
