@@ -4,6 +4,8 @@ from time import sleep
 import os
 from dotenv import load_dotenv
 import json
+import requests
+
 
 load_dotenv()
 
@@ -118,7 +120,7 @@ class TwitterAdvancedSearch:
             # usernames
             identifier = username.contents[1]
             id = identifier.find("a")
-            Id = id.find("span").string
+            Id = id.find("span").string[1:]
             twitter_usernames.append(Id)
 
             # date
@@ -165,12 +167,71 @@ class TwitterAdvancedSearch:
         data["likes"] = twitter_likes
         # usernames
 
-        with open("data.json", "w") as f:
+        with open("tweets.json", "w") as f:
             json.dump(data, f)
+
+    def scrapUsers(self):
+        f = open("tweets.json")
+        data = json.load(f)
+        users = data["usernames"]
+        # download html files
+        # for user in users:
+        #     # start scraping
+        #     url = "https://twitter.com/" + user
+        #     # we must use selenium bcs twitter first page is lazy loading that use javascript code to render content
+        #     driver = webdriver.Chrome()
+        #     driver.get(url)
+        #     sleep(1)
+        #     html = driver.page_source
+        #     file = open("profiles/" + user + ".html", "w")
+        #     # Write the data to the file
+        #     file.write(html)
+        #     # Close the file
+        #     file.close()
+        # soup = BeautifulSoup(response.content, "html.parser")
+        # print(soup.prettify())
+
+        # # localisation
+        # localisation_container = soup.find_all("span")
+        # print(localisation_container)
+
+        # work with scrap again
+        # data-testid="UserProfileSchema-test"
+        twitter_users = []
+        for user in users:
+            twitter_user = {}
+            with open("profiles/" + user + ".html") as file:
+                html = file.read()
+            soup = BeautifulSoup(html, "html.parser")
+            script = soup.find(
+                "script", {"data-testid": "UserProfileSchema-test"}
+            ).string
+            data = json.loads(str(script))
+            twitter_user["type"] = data["@type"]
+            twitter_user["dateCreated"] = data["dateCreated"]
+            twitter_user["username"] = data["author"]["additionalName"]
+            twitter_user["givenName"] = data["author"]["givenName"]
+            twitter_user["description"] = data["author"]["description"]
+            twitter_user["location"] = data["author"]["homeLocation"]["name"]
+            twitter_user["id"] = data["author"]["identifier"]
+            twitter_user["follows"] = data["author"]["interactionStatistic"][0][
+                "userInteractionCount"
+            ]
+            twitter_user["friends"] = data["author"]["interactionStatistic"][1][
+                "userInteractionCount"
+            ]
+            twitter_user["tweets"] = data["author"]["interactionStatistic"][2][
+                "userInteractionCount"
+            ]
+
+            twitter_users.append(twitter_user)
+        with open("users.json", "w") as f:
+            json.dump(twitter_users, f)
 
 
 # get html file
 twitter_bot = TwitterAdvancedSearch(words=["iphone", "new"])
 # password = os.getenv("PASSWORD")
 # twitter_bot.getTweets("KraceAyoub", password)
-twitter_bot.scrapTweets()
+# twitter_bot.scrapTweets()
+twitter_bot.scrapUsers()
