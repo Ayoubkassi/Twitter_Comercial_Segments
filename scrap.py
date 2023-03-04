@@ -101,24 +101,41 @@ class TwitterAdvancedSearch:
 
         twitter_names = []
         twitter_usernames = []
+        twitter_post_date = []
+        twitter_tweets = []
         soup = BeautifulSoup(html, "html.parser")
         articles = soup.find_all("article")
         for articles in articles:
             # names
             username = articles.find("div", {"data-testid": "User-Names"})
             subnames = username.contents[0]
-            names = subnames.find_all("span")[1]
-            name = names.string
+            name = subnames.find_all("span")[1].string
             twitter_names.append(name)
 
             # usernames
             identifier = username.contents[1]
             id = identifier.find("a")
-            Id = id.find("span")
-            twitter_usernames.append(Id.string)
+            Id = id.find("span").string
+            twitter_usernames.append(Id)
+
+            # date
+            post_date = identifier.find("time").string
+            twitter_post_date.append(post_date)
+
+            # tweet
+            tweet_text = ""
+            tweet_div = articles.find("div", {"data-testid": "tweetText"})
+            tweets = tweet_div.find_all("span")
+            for tweet in tweets:
+                if tweet.string.strip() != "\n" and tweet.string.strip() != "":
+                    tweet_text += tweet.string.strip() + " "
+
+            twitter_tweets.append(tweet_text)
+
         data["names"] = twitter_names
         data["usernames"] = twitter_usernames
-        print(data)
+        data["posted_date"] = twitter_post_date
+        data["tweets"] = twitter_tweets
         # usernames
 
         with open("data.json", "w") as f:
