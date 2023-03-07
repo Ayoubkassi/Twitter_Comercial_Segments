@@ -144,10 +144,7 @@ class TwitterAdvancedSearch:
             )
             spans = tweets_div.find_elements(By.TAG_NAME, "span")
             for span_test in spans:
-                try:
                     tweet_text += span_test.text.strip() + " "
-                except exceptions.NoSuchElementException:
-                    continue
 
             twitter_tweets = tweet_text
 
@@ -323,9 +320,9 @@ class TwitterAdvancedSearch:
 if __name__ == "__main__":
     user = "KraceAyoub"
     password = os.getenv("PASSWORD")
-    nb_page = 1
-    words = ["apple"]
-    project = "apple"
+    nb_page = 30
+    words = ["adidas"]
+    project = "adidas"
     twitter_bot = TwitterAdvancedSearch(words)
     twitter_bot.main(user, password, nb_page, words, project)
     twitter_bot.scrapUsers(project)
