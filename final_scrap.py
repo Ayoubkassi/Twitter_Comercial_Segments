@@ -324,8 +324,8 @@ if __name__ == "__main__":
     user = "KraceAyoub"
     password = os.getenv("PASSWORD")
     nb_page = 1
-    words = ["adidas"]
-    project = "adidas"
+    words = ["apple"]
+    project = "apple"
     twitter_bot = TwitterAdvancedSearch(words)
     twitter_bot.main(user, password, nb_page, words, project)
     twitter_bot.scrapUsers(project)
