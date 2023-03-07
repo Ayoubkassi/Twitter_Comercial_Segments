@@ -61,7 +61,7 @@ class TwitterAdvancedSearch:
 
         # get the link with the required params
         first_url = "https://twitter.com/search?q="
-        last_url = "&src=typed_query"
+        last_url = "&src=typed_query&f=live"
         words = self.words
         if len(words) != 0:
             for i in range(0, len(words) - 1):
@@ -188,6 +188,7 @@ class TwitterAdvancedSearch:
 
 
 project = input("What is the name of your project : ")
+n = int(input("Entrer le nomre de page : "))
 words = []
 takeValue = True
 while takeValue:
@@ -201,4 +202,4 @@ while takeValue:
 
 twitter_bot = TwitterAdvancedSearch(words)
 password = os.getenv("PASSWORD")
-twitter_bot.getTweets("KraceAyoub", password, 30)
+twitter_bot.getTweets("KraceAyoub", password, n)
