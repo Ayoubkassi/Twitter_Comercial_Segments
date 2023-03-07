@@ -193,6 +193,11 @@ class TwitterAdvancedSearch:
         # download html files
         for user in users:
             # start scraping
+            user = user[1:]
+            if os.path.isfile("profiles/" + user + ".html") or os.path.isfile(
+                "profiles/@" + user + ".html"
+            ):
+                continue
             url = "https://twitter.com/" + user
             # we must use selenium bcs twitter first page is lazy loading that use javascript code to render content
             driver = webdriver.Chrome()
@@ -208,7 +213,7 @@ class TwitterAdvancedSearch:
         twitter_users = []
         for user in users:
             twitter_user = {}
-            with open(project + "/" + user + ".html") as file:
+            with open("profiles/" + user + ".html") as file:
                 html = file.read()
             soup = BeautifulSoup(html, "html.parser")
             try:
