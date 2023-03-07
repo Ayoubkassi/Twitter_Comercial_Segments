@@ -43,7 +43,7 @@ class TwitterAdvancedSearch:
         self.from_date = from_date
         self.to_date = to_date
 
-    def getTweets(self, username, password, nbPage):
+    def getTweets(self, username, password, nbPage=30):
         try:
             twitter_login = "https://twitter.com/i/flow/login"
             driver = webdriver.Chrome()
@@ -86,8 +86,9 @@ class TwitterAdvancedSearch:
             for i in range(nbPage):
                 driver.execute_script("window.scrollBy(0, 5000);")
                 sleep(1)
+            sleep(5)
             html = driver.page_source
-            file = open("scrap.html", "w")
+            file = open(project + ".html", "w")
             # Write the data to the file
             file.write(html)
             # Close the file
@@ -99,7 +100,7 @@ class TwitterAdvancedSearch:
 
     def scrapTweets(self):
         data = {}
-        with open("scrap.html") as file:
+        with open(project + ".html") as file:
             html = file.read()
 
         twitter_names = []
@@ -111,9 +112,9 @@ class TwitterAdvancedSearch:
         twitter_likes = []
         soup = BeautifulSoup(html, "html.parser")
         articles = soup.find_all("article")
-        for articles in articles:
+        for article in articles:
             # names
-            username = articles.find("div", {"data-testid": "User-Names"})
+            username = article.find("div", {"data-testid": "User-Names"})
             subnames = username.contents[0]
             name = subnames.find_all("span")[1].string
             twitter_names.append(name)
@@ -130,7 +131,7 @@ class TwitterAdvancedSearch:
 
             # tweet
             tweet_text = ""
-            tweet_div = articles.find("div", {"data-testid": "tweetText"})
+            tweet_div = article.find("div", {"data-testid": "tweetText"})
             tweets = tweet_div.find_all("span")
             try:
                 for tweet in tweets:
@@ -140,40 +141,40 @@ class TwitterAdvancedSearch:
                 twitter_tweets.append(tweet_text)
 
                 # replys
-                reply_div = articles.find("div", {"data-testid": "reply"})
+                reply_div = article.find("div", {"data-testid": "reply"})
                 reply = reply_div.find_all("span")[-1].string
                 if reply == None:
                     reply = "0"
                 twitter_replies.append(reply)
 
                 # retweet
-                retweet_div = articles.find("div", {"data-testid": "retweet"})
+                retweet_div = article.find("div", {"data-testid": "retweet"})
                 retweet = reply_div.find_all("span")[-1].string
                 if retweet == None:
                     retweet = "0"
                 twitter_retweets.append(retweet)
 
                 # retweet
-                like_div = articles.find("div", {"data-testid": "like"})
+                like_div = article.find("div", {"data-testid": "like"})
                 like = reply_div.find_all("span")[-1].string
                 if like == None:
                     like = "0"
                 twitter_likes.append(like)
 
+                data["names"] = twitter_names
+                data["usernames"] = twitter_usernames
+                data["posted_date"] = twitter_post_date
+                data["tweets"] = twitter_tweets
+                data["replies"] = twitter_replies
+                data["retweets"] = twitter_retweets
+                data["likes"] = twitter_likes
+                # usernames
+
+                with open(project + "/tweets.json", "w") as f:
+                    json.dump(data, f)
+
             except:
                 pass
-
-        data["names"] = twitter_names
-        data["usernames"] = twitter_usernames
-        data["posted_date"] = twitter_post_date
-        data["tweets"] = twitter_tweets
-        data["replies"] = twitter_replies
-        data["retweets"] = twitter_retweets
-        data["likes"] = twitter_likes
-        # usernames
-
-        with open("tweets.json", "w") as f:
-            json.dump(data, f)
 
     def scrapUsers(self):
         f = open("tweets.json")
@@ -188,7 +189,7 @@ class TwitterAdvancedSearch:
             driver.get(url)
             sleep(1)
             html = driver.page_source
-            file = open("profiles/" + user + ".html", "w")
+            file = open(project + "/" + user + ".html", "w")
             # Write the data to the file
             file.write(html)
             # Close the file
@@ -205,7 +206,7 @@ class TwitterAdvancedSearch:
         twitter_users = []
         for user in users:
             twitter_user = {}
-            with open("profiles/" + user + ".html") as file:
+            with open(project + "/" + user + ".html") as file:
                 html = file.read()
             soup = BeautifulSoup(html, "html.parser")
             try:
@@ -263,13 +264,29 @@ class TwitterAdvancedSearch:
                 pass
 
             twitter_users.append(twitter_user)
-        with open("users.json", "w") as f:
+        with open(project + "/users.json", "w") as f:
             json.dump(twitter_users, f)
 
 
 # get html file
-twitter_bot = TwitterAdvancedSearch(words=["iphone", "new"])
-password = os.getenv("PASSWORD")
-twitter_bot.getTweets("KraceAyoub", password, 10)
+
+
+# project = input("What is the name of your project : ")
+# words = []
+# takeValue = True
+# while takeValue:
+#     words.append(input("Enter a keyword : "))
+#     a = input("Add new keyword (Y/N) : ").lower()
+#     if a == "y":
+#         takeValue = True
+#     else:
+#         takeValue = False
+
+project = "scrap"
+words = []
+
+twitter_bot = TwitterAdvancedSearch(words)
+# password = os.getenv("PASSWORD")
+# twitter_bot.getTweets("KraceAyoub", password, 20)
 twitter_bot.scrapTweets()
 twitter_bot.scrapUsers()
