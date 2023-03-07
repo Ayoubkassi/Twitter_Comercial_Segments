@@ -11,16 +11,6 @@ from selenium.webdriver.common.by import By
 load_dotenv()
 
 
-# from get_gender import getNames
-# import json
-# import os
-
-# data = getNames()
-
-# with open("names.json", "w") as f:
-#     json.dump(data, f)
-
-
 class TwitterAdvancedSearch:
     def __init__(
         self,
@@ -95,7 +85,7 @@ class TwitterAdvancedSearch:
         i = 0
         for i in range(nbPage):
             driver.execute_script("window.scrollBy(0, document.body.scrollHeight);")
-            sleep(2)
+            sleep(1)
             cards = driver.find_elements("xpath", '//article[@data-testid="tweet"]')
             for card in cards:
                 print(i)
@@ -193,94 +183,8 @@ class TwitterAdvancedSearch:
         data["views"] = twitter_views
         data["tweets"] = twitter_tweets
 
-        # usernames
-
         with open(project + ".json", "w") as f:
             json.dump(data, f)
-
-        # except:
-        #     print("error occured!!")
-
-    def scrapTweets(self):
-        data = {}
-        with open(project + ".html") as file:
-            html = file.read()
-
-        twitter_names = []
-        twitter_usernames = []
-        twitter_post_date = []
-        twitter_tweets = []
-        twitter_replies = []
-        twitter_retweets = []
-        twitter_likes = []
-        soup = BeautifulSoup(html, "html.parser")
-        articles = soup.find_all("article")
-        for article in articles:
-            # names
-            username = article.find("div", {"data-testid": "User-Names"})
-            subnames = username.contents[0]
-            name = subnames.find_all("span")[1].string
-            twitter_names.append(name)
-
-            # usernames
-            identifier = username.contents[1]
-            id = identifier.find("a")
-            Id = id.find("span").string[1:]
-            twitter_usernames.append(Id)
-
-            # date
-            post_date = identifier.find("time").string
-            twitter_post_date.append(post_date)
-
-            # tweet
-            tweet_text = ""
-            tweet_div = article.find("div", {"data-testid": "tweetText"})
-            tweets = tweet_div.find_all("span")
-            try:
-                for tweet in tweets:
-                    if tweet.string.strip() != "\n" and tweet.string.strip() != "":
-                        tweet_text += tweet.string.strip() + " "
-
-                twitter_tweets.append(tweet_text)
-
-                # replys
-                reply_div = article.find("div", {"data-testid": "reply"})
-                reply = reply_div.find_all("span")[-1].string
-                if reply == None:
-                    reply = "0"
-                twitter_replies.append(reply)
-
-                # retweet
-                retweet_div = article.find("div", {"data-testid": "retweet"})
-                retweet = reply_div.find_all("span")[-1].string
-                if retweet == None:
-                    retweet = "0"
-                twitter_retweets.append(retweet)
-
-                # retweet
-                like_div = article.find("div", {"data-testid": "like"})
-                like = reply_div.find_all("span")[-1].string
-                if like == None:
-                    like = "0"
-                twitter_likes.append(like)
-
-                data["names"] = twitter_names
-                data["usernames"] = twitter_usernames
-                data["posted_date"] = twitter_post_date
-                data["tweets"] = twitter_tweets
-                data["replies"] = twitter_replies
-                data["retweets"] = twitter_retweets
-                data["likes"] = twitter_likes
-                # usernames
-
-                with open(project + "/tweets.json", "w") as f:
-                    json.dump(data, f)
-
-            except:
-                pass
-
-
-# get html file
 
 
 project = input("What is the name of your project : ")
@@ -298,5 +202,3 @@ while takeValue:
 twitter_bot = TwitterAdvancedSearch(words)
 password = os.getenv("PASSWORD")
 twitter_bot.getTweets("KraceAyoub", password, 30)
-# twitter_bot.scrapTweets()
-# twitter_bot.scrapUsers()
