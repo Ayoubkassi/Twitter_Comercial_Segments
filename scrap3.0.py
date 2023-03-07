@@ -186,20 +186,106 @@ class TwitterAdvancedSearch:
         with open(project + ".json", "w") as f:
             json.dump(data, f)
 
+    def scrapUsers(self):
+        f = open("iphone.json")
+        data = json.load(f)
+        users = data["usernames"]
+        # download html files
+        for user in users:
+            # start scraping
+            url = "https://twitter.com/" + user
+            # we must use selenium bcs twitter first page is lazy loading that use javascript code to render content
+            driver = webdriver.Chrome()
+            driver.get(url)
+            sleep(1)
+            html = driver.page_source
+            file = open("profiles/" + user + ".html", "w")
+            # Write the data to the file
+            file.write(html)
+            # Close the file
+            file.close()
 
-project = input("What is the name of your project : ")
-n = int(input("Entrer le nomre de page : "))
+        twitter_users = []
+        for user in users:
+            twitter_user = {}
+            with open(project + "/" + user + ".html") as file:
+                html = file.read()
+            soup = BeautifulSoup(html, "html.parser")
+            try:
+                script = soup.find(
+                    "script", {"data-testid": "UserProfileSchema-test"}
+                ).string
+                data = json.loads(str(script))
+            except:
+                pass
+            try:
+                twitter_user["type"] = data["@type"]
+            except:
+                pass
+            try:
+                twitter_user["dateCreated"] = data["dateCreated"]
+            except:
+                pass
+            try:
+                twitter_user["username"] = data["author"]["additionalName"]
+            except:
+                pass
+            try:
+                twitter_user["givenName"] = data["author"]["givenName"]
+            except:
+                pass
+            try:
+                twitter_user["description"] = data["author"]["description"]
+            except:
+                pass
+            try:
+                twitter_user["location"] = data["author"]["homeLocation"]["name"]
+            except:
+                pass
+            try:
+                twitter_user["id"] = data["author"]["identifier"]
+            except:
+                pass
+            try:
+                twitter_user["follows"] = data["author"]["interactionStatistic"][0][
+                    "userInteractionCount"
+                ]
+            except:
+                pass
+            try:
+                twitter_user["friends"] = data["author"]["interactionStatistic"][1][
+                    "userInteractionCount"
+                ]
+            except:
+                pass
+            try:
+                twitter_user["tweets"] = data["author"]["interactionStatistic"][2][
+                    "userInteractionCount"
+                ]
+            except:
+                pass
+
+            twitter_users.append(twitter_user)
+        with open(project + "_users.json", "w") as f:
+            json.dump(twitter_users, f)
+
+
+# project = input("What is the name of your project : ")
+# n = int(input("Entrer le nomre de page : "))
+# words = []
+# takeValue = True
+# while takeValue:
+#     words.append(input("Enter a keyword : "))
+#     a = input("Add new keyword (Y/N) : ").lower()
+#     if a == "y":
+#         takeValue = True
+#     else:
+#         takeValue = False
+
 words = []
-takeValue = True
-while takeValue:
-    words.append(input("Enter a keyword : "))
-    a = input("Add new keyword (Y/N) : ").lower()
-    if a == "y":
-        takeValue = True
-    else:
-        takeValue = False
-
+project = "iphone"
 
 twitter_bot = TwitterAdvancedSearch(words)
 password = os.getenv("PASSWORD")
-twitter_bot.getTweets("KraceAyoub", password, n)
+# twitter_bot.getTweets("KraceAyoub", password, n)
+twitter_bot.scrapUsers()
