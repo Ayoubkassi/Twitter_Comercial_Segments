@@ -38,7 +38,7 @@ class TwitterAdvancedSearch:
 
     def login_to_twitter(self, username, password, nbPage=2):
         try:
-            twitter_login = "https://twitter.com/i/flow/login"
+            twitter_login = "https://twitter.com/login"
             driver = webdriver.Chrome()
             driver.get(twitter_login)
             sleep(2)
@@ -71,7 +71,7 @@ class TwitterAdvancedSearch:
     def enter_search_data(self, driver):
         # get the link with the required params
         first_url = "https://twitter.com/search?q="
-        last_url = "&src=typed_query&f=live"
+        last_url = "&src=typed_query"
         words = self.words
         if len(words) != 0:
             for i in range(0, len(words) - 1):
@@ -84,83 +84,81 @@ class TwitterAdvancedSearch:
         return True
 
     def collect_all_tweets_articles(self, driver):
-        cards = driver.find_elements("xpath", '//article[@data-testid="tweet"]')
+        cards = driver.find_elements(
+            "xpath", '//article[@data-testid="tweet"]')
         return cards
 
     def get_data_artcile(self, card):
-        replies = "0"
-        likes = "0"
-        retweets = "0"
-        views = "0"
-        name = "Anonym"
-        username = "Anonym"
-        posted_at = "No Date"
-        twitter_tweets = "Empty Tweet"
 
         try:
             name = card.find_element(
                 "xpath",
                 "./div/div/div[2]/div[2]/div[1]/div/div[1]/div/div/div[1]/div/a/div/div[1]/span",
             ).text
+        except exceptions.NoSuchElementException:
+            name = ""
 
+        try:
             username = card.find_element(
                 "xpath",
                 "./div/div/div[2]/div[2]/div[1]/div/div[1]/div/div/div[2]/div/div[1]/a/div/span",
             ).text
+        except exceptions.NoSuchElementException:
+            username = ""
 
+        try:
             posted_at = card.find_element(
                 "xpath",
                 "./div/div/div[2]/div[2]/div[1]/div/div[1]/div/div/div[2]/div/div[3]/a/time",
             ).text
+        except exceptions.NoSuchElementException:
+            posted_at = ""
 
+        try:
             likes = card.find_element(
                 By.XPATH,
                 "./div/div/div[2]/div[2]/div[4]/div/div[3]/div/div/div[2]/span/span/span",
             ).text
+        except exceptions.NoSuchElementException:
+            likes = ""
 
+        try:
             retweets = card.find_element(
                 By.XPATH,
                 "./div/div/div[2]/div[2]/div[4]/div/div[2]/div/div/div[2]/span/span/span",
             ).text
 
+        except exceptions.NoSuchElementException:
+            retweets = ""
+
+        try:
             views = card.find_element(
                 By.XPATH,
                 "./div/div/div[2]/div[2]/div[4]/div/div[4]/a/div/div[2]/span/span/span",
             ).text
+        except exceptions.NoSuchElementException:
+            views = ""
 
+        try:
             replies = card.find_element(
                 By.XPATH,
                 "./div/div/div[2]/div[2]/div[4]/div/div[1]/div/div/div[2]/span/span/span",
             ).text
+        except exceptions.NoSuchElementException:
+            replies = ""
 
-            tweets = card.find_elements(
-                By.XPATH,
-                "./div/div/div[2]/div[2]/div[3]/div",
-            )
-
-            tweet_text = ""
+        tweet_text = ""
+        try:
             tweets_div = card.find_element(
                 By.XPATH, "./div/div/div[2]/div[2]/div[2]/div"
             )
             spans = tweets_div.find_elements(By.TAG_NAME, "span")
             for span_test in spans:
-                    tweet_text += span_test.text.strip() + " "
-
+                tweet_text += span_test.text.strip() + " "
             twitter_tweets = tweet_text
 
-            tweet = (
-                username,
-                name,
-                posted_at,
-                twitter_tweets,
-                replies,
-                retweets,
-                likes,
-            )
-            return tweet
-
-        except:
-            pass
+        except exceptions.NoSuchElementException:
+            twitter_tweets = ""
 
         tweet = (
             username,
@@ -170,9 +168,8 @@ class TwitterAdvancedSearch:
             replies,
             retweets,
             likes,
-            views,
+            views
         )
-
         return tweet
 
     def generate_tweet_id(self, tweet):
@@ -197,17 +194,20 @@ class TwitterAdvancedSearch:
             if records:
                 writer.writerow(records)
 
-    def main(self, user, password, nb_page, words, project):
+    def main(self, user, password, nb_page, project):
         driver = webdriver.Chrome()
         self.save_tweet_data_to_csv(None, project, "w")
-        self.login_to_twitter(user, password, nb_page)
+        login = self.login_to_twitter(user, password, nb_page)
+        if not login:
+            return False
         self.enter_search_data(driver)
         unique_tweets = set()
 
         for i in range(nb_page):
             articles = self.collect_all_tweets_articles(driver)
             sleep(1)
-            articles = driver.find_elements("xpath", '//article[@data-testid="tweet"]')
+            articles = driver.find_elements(
+                "xpath", '//article[@data-testid="tweet"]')
             for article in articles:
                 try:
                     tweet = self.get_data_artcile(article)
@@ -220,7 +220,8 @@ class TwitterAdvancedSearch:
                     unique_tweets.add(tweet_id)
                     self.save_tweet_data_to_csv(tweet, project)
 
-            driver.execute_script("window.scrollBy(0, document.body.scrollHeight);")
+            driver.execute_script(
+                "window.scrollBy(0, document.body.scrollHeight);")
 
         driver.quit()
 
@@ -320,9 +321,9 @@ class TwitterAdvancedSearch:
 if __name__ == "__main__":
     user = "KraceAyoub"
     password = os.getenv("PASSWORD")
-    nb_page = 30
-    words = ["adidas"]
-    project = "adidas"
+    nb_page = 2
+    words = ["naruto"]
+    project = "naruto"
     twitter_bot = TwitterAdvancedSearch(words)
-    twitter_bot.main(user, password, nb_page, words, project)
+    twitter_bot.main(user, password, nb_page, project)
     twitter_bot.scrapUsers(project)
