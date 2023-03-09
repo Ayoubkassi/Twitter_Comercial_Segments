@@ -7,7 +7,7 @@ import json
 import os
 import csv
 from dotenv import load_dotenv
-import threading 
+import threading
 
 load_dotenv()
 
@@ -321,11 +321,10 @@ class TwitterAdvancedSearch:
         # with open(project + "_users.json", "w") as f:
         #     json.dump(twitter_users, f)
 
-       
     def scrapUsers2(self, users):
         twitter_users = {}
         i = 0
-        project = self.project 
+        project = self.project
         for user in users:
 
             #     continue
@@ -343,10 +342,10 @@ class TwitterAdvancedSearch:
 
             twitter_user = {}
             try:
-                sleep(1)        
+                sleep(1)
                 script_content = driver.execute_script(
                     "return document.querySelector('html head script:nth-of-type(2)').textContent")
-                
+
                 data = json.loads(str(script_content))
                 id = data["author"]["identifier"]
                 print(id)
@@ -392,15 +391,10 @@ class TwitterAdvancedSearch:
                     self.save_record_to_file(twitter_user, project)
             except:
                 pass
-            
+
         # with open(project + "_users.json", "w") as f:
         #     json.dump(twitter_users, f)
 
-
-
-
-
-    
 
 if __name__ == "__main__":
     user = "KraceAyoub"
@@ -408,12 +402,12 @@ if __name__ == "__main__":
     nb_page = 2
     words = ["naruto"]
     project = "apple"
-    twitter_bot = TwitterAdvancedSearch(words=words,project=project)
+    twitter_bot = TwitterAdvancedSearch(words=words, project=project)
     # twitter_bot.main(user, password, nb_page, project)
     # twitter_bot.scrapUsers(project)
-    
+
     # create threads for each set of arguments
-    
+
     users = []
     with open("I_want_to_buy_Iphone_01_feb2022_28feb2023.csv") as csvfile:
         csvreader = csv.reader(csvfile)
@@ -423,7 +417,7 @@ if __name__ == "__main__":
                 i += 1
                 continue
             users.append(row[0][1:])
-            
+
     args_lists = []
     lengh_args = len(users) // 8
     args_lists.append(users[:lengh_args])
@@ -434,7 +428,7 @@ if __name__ == "__main__":
     args_lists.append(users[5*lengh_args:6*lengh_args])
     args_lists.append(users[6*lengh_args:7*lengh_args])
     args_lists.append(users[7*lengh_args:])
-    
+
     threads = []
     for args in args_lists:
         print("args")

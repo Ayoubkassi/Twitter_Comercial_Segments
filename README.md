@@ -4,6 +4,10 @@
 
 **Twitter General Scrapper With Selenium and Beautifoul-Soup**
 
+### Run Data Analysis in Colab To get some usefull infos about your business
+
+![Data Analysis](analys_result.png)
+
 A simple python script to scrap tweets and users , the object is to get the data ready for some analysis studies , we choose MySQL to be the database for our scrapped Data .
 
 ### Tweet Schema :
