@@ -174,6 +174,12 @@ class TwitterAdvancedSearch:
     def generate_tweet_id(self, tweet):
         return "".join(tweet)
 
+    def save_record_to_file(self, record, filename):
+        filename += "_users.json"
+        with open(filename, 'a') as f:
+            json.dump(record, f)
+            f.write('\n')
+
     def save_tweet_data_to_csv(self, records, project, mode="a+"):
         header = [
             "Username",
@@ -236,85 +242,76 @@ class TwitterAdvancedSearch:
                 users.append(row[0][1:])
 
         # download html files
+        twitter_users = {}
         for user in users:
             # start scraping
-            if os.path.isfile("profiles/" + user + ".html"):
-                continue
+            # if os.path.isfile("profiles/" + user + ".html"):
+            #     continue
             url = "https://twitter.com/" + user
             # we must use selenium bcs twitter first page is lazy loading that use javascript code to render content
             driver = webdriver.Chrome()
             driver.get(url)
             sleep(1)
-            html = driver.page_source
-            file = open("profiles/" + user + ".html", "w")
-            # Write the data to the file
-            file.write(html)
-            # Close the file
-            file.close()
+            # html = driver.page_source
+            # file = open("profiles/" + user + ".html", "w")
+            # # Write the data to the file
+            # file.write(html)
+            # # Close the file
+            # file.close()
 
-        twitter_users = []
-        for user in users:
+            # get and store data
             twitter_user = {}
-            with open("profiles/" + user + ".html") as file:
-                html = file.read()
-            soup = BeautifulSoup(html, "html.parser")
             try:
-                script = soup.find(
-                    "script", {"data-testid": "UserProfileSchema-test"}
-                ).string
-                data = json.loads(str(script))
-            except:
-                pass
-            try:
-                twitter_user["type"] = data["@type"]
-            except:
-                pass
-            try:
-                twitter_user["dateCreated"] = data["dateCreated"]
-            except:
-                pass
-            try:
-                twitter_user["username"] = data["author"]["additionalName"]
-            except:
-                pass
-            try:
-                twitter_user["givenName"] = data["author"]["givenName"]
-            except:
-                pass
-            try:
-                twitter_user["description"] = data["author"]["description"]
-            except:
-                pass
-            try:
-                twitter_user["location"] = data["author"]["homeLocation"]["name"]
-            except:
-                pass
-            try:
-                twitter_user["id"] = data["author"]["identifier"]
-            except:
-                pass
-            try:
-                twitter_user["follows"] = data["author"]["interactionStatistic"][0][
-                    "userInteractionCount"
-                ]
-            except:
-                pass
-            try:
-                twitter_user["friends"] = data["author"]["interactionStatistic"][1][
-                    "userInteractionCount"
-                ]
-            except:
-                pass
-            try:
-                twitter_user["tweets"] = data["author"]["interactionStatistic"][2][
-                    "userInteractionCount"
-                ]
+                script_content = driver.execute_script(
+                    "return document.querySelector('html head script:nth-of-type(2)').textContent")
+                data = json.loads(str(script_content))
+                id = data["author"]["identifier"]
+                print(id)
+                if id in twitter_users:
+                    continue
+                else:
+                    twitter_user["type"] = data["@type"]
+                    try:
+                        twitter_user["dateCreated"] = data["dateCreated"]
+                    except:
+                        pass
+                    twitter_user["username"] = data["author"]["additionalName"]
+                    twitter_user["givenName"] = data["author"]["givenName"]
+                    try:
+                        twitter_user["description"] = data["author"]["description"]
+                    except:
+                        pass
+                    try:
+                        twitter_user["location"] = data["author"]["homeLocation"]["name"]
+                    except:
+                        pass
+                    try:
+                        twitter_user["follows"] = data["author"]["interactionStatistic"][0][
+                            "userInteractionCount"
+                        ]
+                    except:
+                        pass
+                    try:
+                        twitter_user["friends"] = data["author"]["interactionStatistic"][1][
+                            "userInteractionCount"
+                        ]
+                    except:
+                        pass
+                    try:
+                        twitter_user["tweets"] = data["author"]["interactionStatistic"][2][
+                            "userInteractionCount"
+                        ]
+                    except:
+                        pass
+
+                    # print(twitter_user)
+                    twitter_users[id] = twitter_user
+                    self.save_record_to_file(twitter_user, project)
             except:
                 pass
 
-            twitter_users.append(twitter_user)
-        with open(project + "_users.json", "w") as f:
-            json.dump(twitter_users, f)
+        # with open(project + "_users.json", "w") as f:
+        #     json.dump(twitter_users, f)
 
 
 if __name__ == "__main__":
@@ -322,7 +319,7 @@ if __name__ == "__main__":
     password = os.getenv("PASSWORD")
     nb_page = 2
     words = ["naruto"]
-    project = "naruto"
+    project = "apple"
     twitter_bot = TwitterAdvancedSearch(words)
-    twitter_bot.main(user, password, nb_page, project)
+    # twitter_bot.main(user, password, nb_page, project)
     twitter_bot.scrapUsers(project)
