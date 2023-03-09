@@ -243,25 +243,32 @@ class TwitterAdvancedSearch:
 
         # download html files
         twitter_users = {}
+        i = 0
         for user in users:
             # start scraping
             # if os.path.isfile("profiles/" + user + ".html"):
             #     continue
             url = "https://twitter.com/" + user
             # we must use selenium bcs twitter first page is lazy loading that use javascript code to render content
-            driver = webdriver.Chrome()
-            driver.get(url)
-            sleep(1)
-            # html = driver.page_source
-            # file = open("profiles/" + user + ".html", "w")
-            # # Write the data to the file
-            # file.write(html)
-            # # Close the file
-            # file.close()
+            if i == 0:
+                driver = webdriver.Chrome()
+                driver.get(url)
+                i += 1
+            else:
+                # html = driver.page_source
+                # file = open("profiles/" + user + ".html", "w")
+                # # Write the data to the file
+                # file.write(html)
+                # # Close the file
+                # file.close()
 
-            # get and store data
+                # get and store data
+                scriptLink = "window.location.href = '{}';".format(url)
+                driver.execute_script(scriptLink)
+
             twitter_user = {}
             try:
+                sleep(1)
                 script_content = driver.execute_script(
                     "return document.querySelector('html head script:nth-of-type(2)').textContent")
                 data = json.loads(str(script_content))
@@ -304,7 +311,6 @@ class TwitterAdvancedSearch:
                     except:
                         pass
 
-                    # print(twitter_user)
                     twitter_users[id] = twitter_user
                     self.save_record_to_file(twitter_user, project)
             except:
