@@ -1,37 +1,22 @@
-import json
-import csv
-import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 
-def to_csv(filename):
-    with open(filename+'.json', 'r') as json_file:
-        data = json.load(json_file)
-
-    with open(filename+'.csv', 'w', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-
-        writer.writerow(data[0].keys())
-
-        for row in data:
-            writer.writerow(row.values())
-
-
-def reformat_json(filename):
-    with open(filename+'.json', 'r') as json_file:
-        data = json.load(json_file)
-
-    new_data = {}
-    females = data["female"]
-    males = data["male"]
-
-    for female in females:
-        new_data[female] = "female"
-
-    for male in males:
-        new_data[male] = "male"
-
-    with open(filename + ".json", "w") as f:
-        json.dump(new_data, f)
+def getNames():
+    # different genders and their corresponding number of pages
+    genders = {"female": ["feminine", 41], "male": ["masculine", 50]}
+    data = {}
+    for key, val in genders.items():
+        my_names = []
+        for i in range(1, val[1]):
+            url = "https://www.behindthename.com/names/gender/" + \
+                val[0] + "/" + str(i)
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, "html.parser")
+            names = soup.find_all("a", {"class": "nll"})
+            my_names.extend([name.text for name in names])
+        data[key] = my_names
+    return data
 
 
 def get_new_column(filename):
@@ -66,6 +51,4 @@ def add_column(filename, column_name):
     df.to_csv(filename+'.csv', index=False)
 
 
-# to_csv("ass_users")
-# reformat_json("old_names")
 # add_column("apple", "gender")
