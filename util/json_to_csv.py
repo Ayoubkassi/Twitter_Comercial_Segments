@@ -1,6 +1,5 @@
 import json
 import csv
-import pandas as pd
 
 
 def to_csv(filename):

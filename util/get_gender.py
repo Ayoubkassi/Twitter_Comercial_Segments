@@ -1,5 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
+import json
+import csv
+import pandas as pd
 
 
 def getNames():
@@ -23,15 +26,16 @@ def get_new_column(filename):
     gender = []
     with open('names.json', 'r') as json_file:
         names_data = json.load(json_file)
-    with open("./Data/"+filename + ".csv") as csvfile:
+    with open(filename + ".csv") as csvfile:
         csvreader = csv.reader(csvfile)
         i = -1
         for row in csvreader:
             i += 1
             if (i == 0):
                 i += 1
+                gender.append("uknown")
                 continue
-            names = row[1].split()
+            names = row[3].split()
             for name in names:
                 if name.capitalize() in names_data:
                     gender.append(names_data[name.capitalize()])
@@ -44,11 +48,11 @@ def get_new_column(filename):
 
 
 def add_column(filename, column_name):
-    new_column_data = get_new_column("apple")
+    new_column_data = get_new_column(filename)
     print(new_column_data)
-    df = pd.read_csv("./Data/"+filename+'.csv')
+    df = pd.read_csv(filename+'.csv')
     df[column_name] = new_column_data
     df.to_csv(filename+'.csv', index=False)
 
 
-# add_column("apple", "gender")
+add_column("i_want_an_iphone_after_+10500_users", "gender")
