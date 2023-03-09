@@ -34,5 +34,5 @@ def reformat_json(filename):
         json.dump(new_data, f)
 
 
-# to_csv("ass_users")
+# to_csv("../apple_users")
 # reformat_json("old_names")
