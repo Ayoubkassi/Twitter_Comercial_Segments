@@ -7,7 +7,7 @@ import json
 import os
 import csv
 from dotenv import load_dotenv
-
+import threading 
 
 load_dotenv()
 
@@ -16,6 +16,7 @@ class TwitterAdvancedSearch:
     def __init__(
         self,
         words=[],
+        project="",
         exact_phrase="",
         none_words=[],
         hashtags=[],
@@ -26,6 +27,7 @@ class TwitterAdvancedSearch:
         to_date="02-03-2023",
     ):
         self.words = words
+        self.project = project
         self.exact_phrase = exact_phrase
         self.none_words = none_words
         self.hashtags = hashtags
@@ -319,6 +321,86 @@ class TwitterAdvancedSearch:
         # with open(project + "_users.json", "w") as f:
         #     json.dump(twitter_users, f)
 
+       
+    def scrapUsers2(self, users):
+        twitter_users = {}
+        i = 0
+        project = self.project 
+        for user in users:
+
+            #     continue
+            url = "https://twitter.com/" + user
+            # we must use selenium bcs twitter first page is lazy loading that use javascript code to render content
+            if i == 0:
+                driver = webdriver.Chrome()
+                driver.get(url)
+                i += 1
+            else:
+
+                # get and store data
+                scriptLink = "window.location.href = '{}';".format(url)
+                driver.execute_script(scriptLink)
+
+            twitter_user = {}
+            try:
+                sleep(1)        
+                script_content = driver.execute_script(
+                    "return document.querySelector('html head script:nth-of-type(2)').textContent")
+                
+                data = json.loads(str(script_content))
+                id = data["author"]["identifier"]
+                print(id)
+                if id in twitter_users:
+                    continue
+                else:
+                    twitter_user["type"] = data["@type"]
+                    try:
+                        twitter_user["dateCreated"] = data["dateCreated"]
+                    except:
+                        pass
+                    twitter_user["username"] = data["author"]["additionalName"]
+                    twitter_user["givenName"] = data["author"]["givenName"]
+                    try:
+                        twitter_user["description"] = data["author"]["description"]
+                    except:
+                        pass
+                    try:
+                        twitter_user["location"] = data["author"]["homeLocation"]["name"]
+                    except:
+                        pass
+                    try:
+                        twitter_user["follows"] = data["author"]["interactionStatistic"][0][
+                            "userInteractionCount"
+                        ]
+                    except:
+                        pass
+                    try:
+                        twitter_user["friends"] = data["author"]["interactionStatistic"][1][
+                            "userInteractionCount"
+                        ]
+                    except:
+                        pass
+                    try:
+                        twitter_user["tweets"] = data["author"]["interactionStatistic"][2][
+                            "userInteractionCount"
+                        ]
+                    except:
+                        pass
+
+                    twitter_users[id] = twitter_user
+                    # print(twitter_user)
+                    self.save_record_to_file(twitter_user, project)
+            except:
+                pass
+            
+        # with open(project + "_users.json", "w") as f:
+        #     json.dump(twitter_users, f)
+
+
+
+
+
+    
 
 if __name__ == "__main__":
     user = "KraceAyoub"
@@ -326,6 +408,54 @@ if __name__ == "__main__":
     nb_page = 2
     words = ["naruto"]
     project = "apple"
-    twitter_bot = TwitterAdvancedSearch(words)
+    twitter_bot = TwitterAdvancedSearch(words=words,project=project)
     # twitter_bot.main(user, password, nb_page, project)
-    twitter_bot.scrapUsers(project)
+    # twitter_bot.scrapUsers(project)
+    
+    # create threads for each set of arguments
+    
+    users = []
+    with open("I_want_to_buy_Iphone_01_feb2022_28feb2023.csv") as csvfile:
+        csvreader = csv.reader(csvfile)
+        i = 0
+        for row in csvreader:
+            if i == 0:
+                i += 1
+                continue
+            users.append(row[0][1:])
+            
+    args_lists = []
+    lengh_args = len(users) // 8
+    args_lists.append(users[:lengh_args])
+    args_lists.append(users[lengh_args:2*lengh_args])
+    args_lists.append(users[2*lengh_args:3*lengh_args])
+    args_lists.append(users[3*lengh_args:4*lengh_args])
+    args_lists.append(users[4*lengh_args:5*lengh_args])
+    args_lists.append(users[5*lengh_args:6*lengh_args])
+    args_lists.append(users[6*lengh_args:7*lengh_args])
+    args_lists.append(users[7*lengh_args:])
+    
+    threads = []
+    for args in args_lists:
+        print("args")
+        print(type(args))
+        thread = threading.Thread(target=twitter_bot.scrapUsers2, args=(args,))
+        threads.append(thread)
+
+    # start all the threads
+    for thread in threads:
+        thread.start()
+
+    # wait for all the threads to finish
+    for thread in threads:
+        thread.join()
+
+# if __name__ == "__main__":
+#     user = "KraceAyoub"
+#     password = os.getenv("PASSWORD")
+#     nb_page = 2
+#     words = ["naruto"]
+#     project = "apple"
+#     twitter_bot = TwitterAdvancedSearch(words)
+#     # twitter_bot.main(user, password, nb_page, project)
+#     twitter_bot.scrapUsers(project)
