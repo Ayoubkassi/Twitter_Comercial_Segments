@@ -2,7 +2,9 @@
 
 ---
 
-**Twitter General Scrapper With Selenium and Beautifoul-Soup**
+**Twitter General Multi Threaded Scrapper With Selenium and Beautifoul-Soup**
+
+We presented this project (initally a class project) to our fellow students (@INSA Lyon) today. You can check the presentation (in French) here:[Presentation Link](https://www.canva.com/design/DAFcvmVm-Nc/4B7Mo-JtfyUaU7TM-u5N1w/view?utm_content=DAFcvmVm-Nc&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
 ### Run Data Analysis in Colab To get some usefull infos about your business
 
