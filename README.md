@@ -39,3 +39,11 @@ docker run twitter-scrap
 ```
 
 Dockerhub repository : [Click Here](https://hub.docker.com/repository/docker/ayoubkassi/twitter-scrap/general)
+
+#### To export mysql database :
+
+> mysqldump -u YourUser -p YourDatabaseName > wantedsqlfile.sql
+
+#### To export mongodb database :
+
+> mongodump --db mydb --out backup/
