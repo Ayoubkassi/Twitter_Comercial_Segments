@@ -9,6 +9,8 @@ import csv
 from dotenv import load_dotenv
 import threading
 
+
+
 load_dotenv()
 
 
@@ -180,7 +182,7 @@ class TwitterAdvancedSearch:
         filename += "_users.json"
         with open("data/"+filename, 'a') as f:
             json.dump(record, f)
-            f.write('\n')
+            f.write(',\n')
 
     def save_tweet_data_to_csv(self, records, project, mode="a+"):
         header = [
@@ -194,7 +196,7 @@ class TwitterAdvancedSearch:
             "Views",
         ]
         project += ".csv"
-        with open(project, mode=mode, newline="", encoding="utf-8") as f:
+        with open("data/"+project, mode=mode, newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             if mode == "w":
                 writer.writerow(header)
@@ -318,9 +320,8 @@ class TwitterAdvancedSearch:
             except:
                 pass
 
-        # with open(project + "_users.json", "w") as f:
-        #     json.dump(twitter_users, f)
-
+        
+        
 
     # Scrapping users using multithreading for a faster scrapping
     def scrapUsers2(self, users):
@@ -393,25 +394,62 @@ class TwitterAdvancedSearch:
                     self.save_record_to_file(twitter_user, project)
             except:
                 pass
+        
+ 
+    def fixing_json_problem(self, project):
+        # Open the JSON file in read mode
+        with open("data/" + project +'_users' +'.json', 'r') as f:
+            # Read the contents of the file
+            contents = f.read()
 
-        # with open(project + "_users.json", "w") as f:
-        #     json.dump(twitter_users, f)
 
+        # Remove the comma at the end of the last JSON object
+        contents = contents[:-2] if contents.endswith(',\n') else contents
 
+        
+        # Add "[" at the beginning and "]" at the end of the contents
+        new_contents = '[' + contents  + ']'
+    
+        
+        # Open the same file in write mode
+        with open("data/" + project +'_users' +'.json', 'w') as f:
+            # Write the modified contents back to the file
+            f.write(new_contents)
+
+        # Close the file
+        f.close()
+        
 if __name__ == "__main__":
-    user = "KraceAyoub"
-    password = os.getenv("PASSWORD")
-    nb_page = 2
-    words = ["naruto"]
-    project = "apple"
+    user = "amineloco5"
+    # password = os.getenv("PASSWORD")
+    nb_page = 1
+    words = []
+    
+    project = input("What is the name of your project : ")
+    takeValue = True
+    while takeValue:
+        words.append(input("Enter a keyword: "))
+        while True:
+            a = input("Add new keyword (Y/N): ").lower()
+            if a == "y" or a == "n":
+                break
+            else:
+                print("Invalid input. Please enter 'Y' or 'N'.")
+        if a == "y":
+            takeValue = True
+        else:
+            takeValue = False
+    
     twitter_bot = TwitterAdvancedSearch(words=words, project=project)
-    # twitter_bot.main(user, password, nb_page, project)
+    twitter_bot.main(user, "Amine-1963", nb_page, project)
+    
+    # scrapping users without multithreading
     # twitter_bot.scrapUsers(project)
 
     # create threads for each set of arguments
 
     users = []
-    with open("data/I_want_to_buy_Iphone_01_feb2022_28feb2023.csv") as csvfile:
+    with open("data/"+ project + ".csv") as csvfile:
         csvreader = csv.reader(csvfile)
         i = 0
         for row in csvreader:
@@ -446,3 +484,5 @@ if __name__ == "__main__":
     for thread in threads:
         thread.join()
 
+    twitter_bot.fixing_json_problem(project)
+    
