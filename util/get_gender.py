@@ -52,7 +52,7 @@ def add_column(filename, column_name):
     print(new_column_data)
     df = pd.read_csv(filename+'.csv')
     df[column_name] = new_column_data
-    df.to_csv(filename+'.csv', index=False)
+    df.to_csv('../data'+ filename+'.csv', index=False)
 
 
-add_column("i_want_an_iphone_after_+10500_users", "gender")
+# add_column("i_want_an_iphone_after_+10500_users", "gender")

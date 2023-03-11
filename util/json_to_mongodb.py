@@ -6,14 +6,15 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['twitterScrap']
 
 
-with open('../i_want_an_iphone_after_+10500_users_with_gender.json') as f:
+with open('../data/i_want_an_iphone_after_+10500_users_with_gender.json') as f:
     data = json.load(f)
 
 
 collection = db['iphone_users']
 result = collection.insert_many(data)
+
 # # Read the JSON file
-# with open('../i_want_an_iphone_after_+10500_users_with_gender.json') as f:
+# with open('../data/i_want_an_iphone_after_+10500_users_with_gender.json') as f:
 #     decoder = json.JSONDecoder()
 #     data = f.read()
 #     while data:

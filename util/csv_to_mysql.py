@@ -7,7 +7,7 @@ load_dotenv()
 
 
 # Read the CSV file into a pandas dataframe
-df = pd.read_csv('../i_want_an_iphone_after_+10500.csv')
+df = pd.read_csv('../data/i_want_an_iphone_after_+10500.csv')
 # print(df)
 
 # Connect to a MySQL database

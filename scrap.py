@@ -178,7 +178,7 @@ class TwitterAdvancedSearch:
 
     def save_record_to_file(self, record, filename):
         filename += "_users.json"
-        with open(filename, 'a') as f:
+        with open("data/"+filename, 'a') as f:
             json.dump(record, f)
             f.write('\n')
 
@@ -321,6 +321,8 @@ class TwitterAdvancedSearch:
         # with open(project + "_users.json", "w") as f:
         #     json.dump(twitter_users, f)
 
+
+    # Scrapping users using multithreading for a faster scrapping
     def scrapUsers2(self, users):
         twitter_users = {}
         i = 0
@@ -409,7 +411,7 @@ if __name__ == "__main__":
     # create threads for each set of arguments
 
     users = []
-    with open("I_want_to_buy_Iphone_01_feb2022_28feb2023.csv") as csvfile:
+    with open("data/I_want_to_buy_Iphone_01_feb2022_28feb2023.csv") as csvfile:
         csvreader = csv.reader(csvfile)
         i = 0
         for row in csvreader:
@@ -444,12 +446,3 @@ if __name__ == "__main__":
     for thread in threads:
         thread.join()
 
-# if __name__ == "__main__":
-#     user = "KraceAyoub"
-#     password = os.getenv("PASSWORD")
-#     nb_page = 2
-#     words = ["naruto"]
-#     project = "apple"
-#     twitter_bot = TwitterAdvancedSearch(words)
-#     # twitter_bot.main(user, password, nb_page, project)
-#     twitter_bot.scrapUsers(project)
