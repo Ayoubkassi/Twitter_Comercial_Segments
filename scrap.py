@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 import threading
 
 
-
 load_dotenv()
 
 
@@ -22,11 +21,11 @@ class TwitterAdvancedSearch:
         exact_phrase="",
         none_words=[],
         hashtags=[],
-        min_replies=0,
-        min_likes=0,
-        min_retweets=0,
-        from_date="02-03-2023",
-        to_date="02-03-2023",
+        min_replies=10,
+        min_likes=10,
+        min_retweets=10,
+        from_date="2022-03-02",
+        to_date="2023-03-11",
     ):
         self.words = words
         self.project = project
@@ -74,13 +73,49 @@ class TwitterAdvancedSearch:
     def enter_search_data(self, driver):
         # get the link with the required params
         first_url = "https://twitter.com/search?q="
-        last_url = "&src=typed_query"
+        last_url = '&src=typed_query'
         words = self.words
         if len(words) != 0:
             for i in range(0, len(words) - 1):
                 first_url += words[i] + "%20"
             first_url += words[-1]
-        url = first_url + last_url
+
+        # add exact phrase
+        second_url = ""
+        phrase = self.exact_phrase.strip().split()
+        if len(phrase) != 0:
+            for i in range(0, len(phrase) - 1):
+                second_url += phrase[i] + "%20"
+            second_url += phrase[-1]
+
+        exact_phrase_words = second_url
+        exact_phrase_words += '%20"'
+
+        # none words
+        third_url = "%20-"
+        none_words = self.none_words
+        none_words = none_words.strip().split()
+        if len(none_words) != 0:
+            for i in range(0, len(none_words) - 1):
+                third_url += none_words[i] + "%20-"
+            third_url += none_words[-1]
+
+        # min_replies%3A20%20min_faves%3A30%20min_retweets%3A40
+        min_replies = self.min_replies
+        min_faves = self.min_likes
+        min_retweets = self.min_retweets
+
+        fourd_url = "%20min_replies%3A"+str(min_replies) + "%20min_faves%3A" + str(
+            min_faves) + "%20min_retweets%3A" + str(min_retweets)
+
+        # until%3A2011-06-15%20since%3A2011-03-16
+        from_date = self.from_date
+        until_date = self.to_date
+        five_url = "%20until%3A" + from_date + "%20since%3A" + until_date
+
+        url = first_url + '"' + exact_phrase_words + \
+            third_url + fourd_url + five_url + last_url
+
         driver.get(url)
         sleep(5)
 
@@ -206,9 +241,9 @@ class TwitterAdvancedSearch:
     def main(self, user, password, nb_page, project):
         driver = webdriver.Chrome()
         self.save_tweet_data_to_csv(None, project, "w")
-        login = self.login_to_twitter(user, password, nb_page)
-        if not login:
-            return False
+        # login = self.login_to_twitter(user, password, nb_page)
+        # if not login:
+        #     return False
         self.enter_search_data(driver)
         unique_tweets = set()
 
@@ -320,10 +355,8 @@ class TwitterAdvancedSearch:
             except:
                 pass
 
-        
-        
-
     # Scrapping users using multithreading for a faster scrapping
+
     def scrapUsers2(self, users):
         twitter_users = {}
         i = 0
@@ -394,37 +427,34 @@ class TwitterAdvancedSearch:
                     self.save_record_to_file(twitter_user, project)
             except:
                 pass
-        
- 
+
     def fixing_json_problem(self, project):
         # Open the JSON file in read mode
-        with open("data/" + project +'_users' +'.json', 'r') as f:
+        with open("data/" + project + '_users' + '.json', 'r') as f:
             # Read the contents of the file
             contents = f.read()
-
 
         # Remove the comma at the end of the last JSON object
         contents = contents[:-2] if contents.endswith(',\n') else contents
 
-        
         # Add "[" at the beginning and "]" at the end of the contents
-        new_contents = '[' + contents  + ']'
-    
-        
+        new_contents = '[' + contents + ']'
+
         # Open the same file in write mode
-        with open("data/" + project +'_users' +'.json', 'w') as f:
+        with open("data/" + project + '_users' + '.json', 'w') as f:
             # Write the modified contents back to the file
             f.write(new_contents)
 
         # Close the file
         f.close()
-        
+
+
 if __name__ == "__main__":
     user = "amineloco5"
     # password = os.getenv("PASSWORD")
     nb_page = 1
     words = []
-    
+
     project = input("What is the name of your project : ")
     takeValue = True
     while takeValue:
@@ -439,17 +469,18 @@ if __name__ == "__main__":
             takeValue = True
         else:
             takeValue = False
-    
-    twitter_bot = TwitterAdvancedSearch(words=words, project=project)
+
+    twitter_bot = TwitterAdvancedSearch(
+        words=words, project=project, none_words="nudes")
     twitter_bot.main(user, "Amine-1963", nb_page, project)
-    
+
     # scrapping users without multithreading
     # twitter_bot.scrapUsers(project)
 
     # create threads for each set of arguments
 
     users = []
-    with open("data/"+ project + ".csv") as csvfile:
+    with open("data/" + project + ".csv") as csvfile:
         csvreader = csv.reader(csvfile)
         i = 0
         for row in csvreader:
@@ -485,6 +516,10 @@ if __name__ == "__main__":
         thread.join()
 
     twitter_bot.fixing_json_problem(project)
-    
-    
+
     # https://twitter.com/search?q=%22i%20want%20an%20iphone%22%20min_replies%3A10%20min_faves%3A10%20min_retweets%3A5%20until%3A2023-03-11%20since%3A2006-01-01&src=typed_query&f=live
+
+
+# https://twitter.com/search?q=iphone%22%20%22%20-nudes%20min_replies%3A10%20min_faves%3A10%20min_retweets%3A10%20until%3A2023-03-02%20since%3A2023-03-11&src=typed_query
+
+#  https://twitter.com/search?q=iphone%20-nudes%20min_replies%3A10%20min_faves%3A10%20min_retweets%3A10%20until%3A2013-05-15%20since%3A2013-02-16&src=typed_query
