@@ -24,7 +24,7 @@ class TwitterAdvancedSearch:
         min_replies=10,
         min_likes=10,
         min_retweets=10,
-        from_date="2022-03-02",
+        from_date="2013-03-02",
         to_date="2023-03-11",
     ):
         self.words = words
@@ -82,20 +82,22 @@ class TwitterAdvancedSearch:
 
         # add exact phrase
         second_url = ""
+        exact_phrase_words = ""
         phrase = self.exact_phrase.strip().split()
         if len(phrase) != 0:
             for i in range(0, len(phrase) - 1):
                 second_url += phrase[i] + "%20"
             second_url += phrase[-1]
-
-        exact_phrase_words = second_url
-        exact_phrase_words += '%20"'
+            exact_phrase_words = second_url
+            exact_phrase_words += '%20"'
+            exact_phrase_words = '"' + exact_phrase_words
 
         # none words
-        third_url = "%20-"
+        third_url = ""
         none_words = self.none_words
         none_words = none_words.strip().split()
         if len(none_words) != 0:
+            third_url = "%20-"
             for i in range(0, len(none_words) - 1):
                 third_url += none_words[i] + "%20-"
             third_url += none_words[-1]
@@ -111,9 +113,9 @@ class TwitterAdvancedSearch:
         # until%3A2011-06-15%20since%3A2011-03-16
         from_date = self.from_date
         until_date = self.to_date
-        five_url = "%20until%3A" + from_date + "%20since%3A" + until_date
+        five_url = "%20until%3A" + until_date + "%20since%3A" + from_date
 
-        url = first_url + '"' + exact_phrase_words + \
+        url = first_url + exact_phrase_words + \
             third_url + fourd_url + five_url + last_url
 
         driver.get(url)
@@ -471,7 +473,7 @@ if __name__ == "__main__":
             takeValue = False
 
     twitter_bot = TwitterAdvancedSearch(
-        words=words, project=project, none_words="nudes")
+        words=words, project=project, none_words="", exact_phrase="iphone")
     twitter_bot.main(user, "Amine-1963", nb_page, project)
 
     # scrapping users without multithreading
@@ -520,6 +522,7 @@ if __name__ == "__main__":
     # https://twitter.com/search?q=%22i%20want%20an%20iphone%22%20min_replies%3A10%20min_faves%3A10%20min_retweets%3A5%20until%3A2023-03-11%20since%3A2006-01-01&src=typed_query&f=live
 
 
-# https://twitter.com/search?q=iphone%22%20%22%20-nudes%20min_replies%3A10%20min_faves%3A10%20min_retweets%3A10%20until%3A2023-03-02%20since%3A2023-03-11&src=typed_query
+# https://twitter.com/search?q=iphone%22iphone%20%22%20min_replies%3A10%20min_faves%3A10%20min_retweets%3A10%20until%3A2013-03-02%20since%3A2023-03-11&src=typed_query
 
-#  https://twitter.com/search?q=iphone%20-nudes%20min_replies%3A10%20min_faves%3A10%20min_retweets%3A10%20until%3A2013-05-15%20since%3A2013-02-16&src=typed_query
+
+# https://twitter.com/search?f=top&q=iphone%20%22iphone%22%20min_replies%3A10%20min_faves%3A10%20min_retweets%3A10%20until%3A2021-08-15%20since%3A2014-06-17&src=typed_query
