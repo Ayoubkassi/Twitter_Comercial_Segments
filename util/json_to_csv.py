@@ -3,10 +3,10 @@ import csv
 
 
 def to_csv(filename):
-    with open(filename+'.json', 'r') as json_file:
+    with open("../data/"+ filename + '.json', 'r') as json_file:
         data = json.load(json_file)
 
-    with open(filename+'.csv', 'w', newline='') as csv_file:
+    with open("../data/" + filename+'.csv', 'w', newline='') as csv_file:
         writer = csv.writer(csv_file)
 
         writer.writerow(data[0].keys())
@@ -15,6 +15,8 @@ def to_csv(filename):
             writer.writerow(row.values())
 
 
+
+# we changed the scrapped names data to a hashmap to make the complexity of the code constant and not linear as it was.
 def reformat_json(filename):
     with open(filename+'.json', 'r') as json_file:
         data = json.load(json_file)
@@ -33,5 +35,5 @@ def reformat_json(filename):
         json.dump(new_data, f)
 
 
-# to_csv("../apple_users")
+to_csv("apple_users")
 # reformat_json("old_names")

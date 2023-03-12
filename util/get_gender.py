@@ -26,7 +26,7 @@ def get_new_column(filename):
     gender = []
     with open('names.json', 'r') as json_file:
         names_data = json.load(json_file)
-    with open(filename + ".csv") as csvfile:
+    with open("../data/" + filename + ".csv") as csvfile:
         csvreader = csv.reader(csvfile)
         i = -1
         for row in csvreader:
@@ -50,9 +50,9 @@ def get_new_column(filename):
 def add_column(filename, column_name):
     new_column_data = get_new_column(filename)
     print(new_column_data)
-    df = pd.read_csv(filename+'.csv')
-    df[column_name] = new_column_data
-    df.to_csv('../data'+ filename+'.csv', index=False)
+    df = pd.read_csv("../data/"+filename+'.csv')
+    df[column_name] = new_column_data[1:]
+    df.to_csv('../data/'+ filename+ "with_gender" + '.csv', index=False)
 
 
-# add_column("i_want_an_iphone_after_+10500_users", "gender")
+add_column("apple_users", "gender")
