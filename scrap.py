@@ -8,7 +8,7 @@ import os
 import csv
 from dotenv import load_dotenv
 import threading
-
+from datetime import date
 
 load_dotenv()
 
@@ -19,13 +19,13 @@ class TwitterAdvancedSearch:
         words=[],
         project="",
         exact_phrase="",
-        none_words=[],
+        none_words="",
         hashtags=[],
-        min_replies=10,
-        min_likes=10,
-        min_retweets=10,
-        from_date="2013-03-02",
-        to_date="2023-03-11",
+        min_replies=0,
+        min_likes=0,
+        min_retweets= 0,
+        from_date="2006-01-01",
+        to_date= str(date.today()),
     ):
         self.words = words
         self.project = project
@@ -74,6 +74,7 @@ class TwitterAdvancedSearch:
         # get the link with the required params
         first_url = "https://twitter.com/search?q="
         last_url = '&src=typed_query'
+        
         words = self.words
         if len(words) != 0:
             for i in range(0, len(words) - 1):
@@ -93,9 +94,9 @@ class TwitterAdvancedSearch:
             exact_phrase_words = '"' + exact_phrase_words
 
         # none words
+    
         third_url = ""
         none_words = self.none_words
-        none_words = none_words.strip().split()
         if len(none_words) != 0:
             third_url = "%20-"
             for i in range(0, len(none_words) - 1):
@@ -118,6 +119,7 @@ class TwitterAdvancedSearch:
         url = first_url + exact_phrase_words + \
             third_url + fourd_url + five_url + last_url
 
+        url += "&f=live"
         driver.get(url)
         sleep(5)
 
@@ -240,6 +242,8 @@ class TwitterAdvancedSearch:
             if records:
                 writer.writerow(records)
 
+            
+                  
     def main(self, user, password, nb_page, project):
         driver = webdriver.Chrome()
         self.save_tweet_data_to_csv(None, project, "w")
@@ -265,7 +269,9 @@ class TwitterAdvancedSearch:
                 if tweet_id not in unique_tweets:
                     unique_tweets.add(tweet_id)
                     self.save_tweet_data_to_csv(tweet, project)
-
+                
+                
+                    
             driver.execute_script(
                 "window.scrollBy(0, document.body.scrollHeight);")
 
@@ -454,27 +460,69 @@ class TwitterAdvancedSearch:
 if __name__ == "__main__":
     user = "amineloco5"
     # password = os.getenv("PASSWORD")
-    nb_page = 1
+    nb_page = 10
     words = []
-
+    exact_phrase_words = ""
+    none_words = []
     project = input("What is the name of your project : ")
     takeValue = True
-    while takeValue:
-        words.append(input("Enter a keyword: "))
-        while True:
-            a = input("Add new keyword (Y/N): ").lower()
-            if a == "y" or a == "n":
-                break
-            else:
-                print("Invalid input. Please enter 'Y' or 'N'.")
-        if a == "y":
-            takeValue = True
-        else:
-            takeValue = False
+    from_date = ""
+    to_date = ""
+        
+    askwords = input("Enter a keywords, if many seperate them with a comma  ',': ")
+    words.extend(askwords.split(","))
+    
+    
+    ask_exact_phrase_words = input("Add an exacte phrase ?(Y/N): ").lower()
+    if ask_exact_phrase_words == 'y':
+        exact_phrase_words = input("Add an exacte phrase : ").lower()
+    else:
+        exact_phrase_words = ""
 
-    twitter_bot = TwitterAdvancedSearch(
-        words=words, project=project, none_words="", exact_phrase="iphone")
-    twitter_bot.main(user, "Amine-1963", nb_page, project)
+    asknone_words = input("Add none words (Y/N): ")
+    if asknone_words == 'y':
+        get_none_words = input("Add none words, if many seperate them with a comma ','  ").lower()
+        none_words.extend(get_none_words.split(","))
+    else:
+        none_words = []
+        
+    askfordat = input("Do you want to search within a timeline ? (Y/N): ").lower()
+    if askfordat == 'y':
+        from_date = input("from which date  (date format : YYYY-MM-DD ) : ")
+        to_date = input("to which date  (date format : YYYY-MM-DD ) : ")
+    else:
+        from_date = "2006-01-01"
+        to_date = str(date.today())
+        
+    aksForReplies = input("Do you want to specify minimum replies ? (Y/N): ").lower()
+    if aksForReplies == 'y':
+        min_replies = int(input(" How many minimum replies : "))
+    else:
+        min_replies = 0
+        
+    aksForLikes = input("Do you want to specify minimum likes ? (Y/N): ").lower()
+    if aksForLikes == 'y':
+        min_likes = int(input("How many minimum likes : "))
+    else:
+        min_likes = 0
+    
+    aksForRetweets = input("Do you want to specify minimum retweets ? (Y/N): ").lower()
+    if aksForRetweets == 'y':
+        min_retweets = int(input("How many minimum retweets : "))
+    else:
+        min_retweets = 0
+    
+    number_of_tweets = int(input("what's the max number of pages you wanna scroll : "))
+    
+    if from_date == "" and to_date == "":
+        twitter_bot = TwitterAdvancedSearch(
+        words=words, project=project, none_words=none_words, exact_phrase=exact_phrase_words, min_likes=min_likes, min_replies=min_replies,min_retweets=min_retweets)
+    else :
+        twitter_bot = TwitterAdvancedSearch(
+        words=words, project=project, none_words=none_words, exact_phrase=exact_phrase_words, from_date=from_date, to_date=to_date, min_likes=min_likes, min_replies=min_replies,min_retweets=min_retweets)
+    
+    
+    twitter_bot.main(user, "Amine-1963", number_of_tweets, project)
 
     # scrapping users without multithreading
     # twitter_bot.scrapUsers(project)
@@ -504,8 +552,8 @@ if __name__ == "__main__":
 
     threads = []
     for args in args_lists:
-        print("args")
-        print(type(args))
+        # print("args")
+        # print(type(args))
         thread = threading.Thread(target=twitter_bot.scrapUsers2, args=(args,))
         threads.append(thread)
 
